@@ -59,6 +59,18 @@ The answer is restricted to retrieved text, summarized without inline citations,
 
 Retrieval is hybrid: Nebius dense-vector similarity is combined with a local keyword score. This helps precise terms, abbreviations, and numeric technical questions while retaining semantic matching.
 
+## Optional LangSmith tracing
+
+LangSmith traces the LangGraph retrieve → generate workflow automatically when enabled. Create an API key in [LangSmith](https://smith.langchain.com/), then add the following to your local `.env` file:
+
+```text
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=your_langsmith_api_key
+LANGSMITH_PROJECT=als-mnd-knowledge-chatbot
+```
+
+Run the chatbot as usual and inspect the traces in the named LangSmith project. Do not commit the API key. Traces can contain user questions and retrieved research excerpts, so enable them only when that sharing is appropriate.
+
 
 ## Streamlit dashboard
 

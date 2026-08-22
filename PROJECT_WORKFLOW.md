@@ -20,6 +20,7 @@ The goal is to make a small, transparent research assistant that grounds answers
 | Retrieval | Hybrid retrieval: dense-vector similarity plus local sparse keyword scoring. |
 | Orchestration | LangGraph retrieve → generate workflow. |
 | Generation | Nebius-hosted `meta-llama/Llama-3.3-70B-Instruct` chat model. |
+| Observability | Optional LangSmith tracing for LangGraph requests, enabled through environment variables. |
 | Public-health dashboard data | A prepared IHME GBD Motor Neuron Disease export in `data/mnd_burden.csv`, used separately from the literature corpus. |
 
 ## 3. Datasets Used
@@ -62,6 +63,10 @@ After generation, the application appends deduplicated clickable PMC article lin
 - The chatbot should not invent an answer when retrieved excerpts lack evidence.
 - The application should summarize evidence rather than provide clinical advice.
 - Retrieved sources should be shown as PMC web links rather than internal XML references alone.
+
+### 4.4 Optional LangSmith tracing
+
+LangSmith tracing is available for the LangGraph workflow. Add `LANGSMITH_TRACING=true`, `LANGSMITH_API_KEY`, and `LANGSMITH_PROJECT=als-mnd-knowledge-chatbot` to `.env` to capture request traces. Traces should be enabled only when it is appropriate to send user questions and retrieved excerpts to LangSmith.
 
 ## 5. Iterations Tried
 
@@ -131,7 +136,7 @@ After this change, the chatbot correctly answered that active-period SNR rose fr
 - The corpus is manually refreshed and limited to 100 articles.
 - No formal faithfulness, retrieval-relevance, or answer-correctness benchmark has been run yet.
 - Hybrid sparse retrieval is a lightweight in-project implementation, not a full BM25 or production search service.
-- There is no reranker, feedback capture, scheduled ingestion, LangSmith tracing, or automated regression suite.
+- There is no reranker, feedback capture, scheduled ingestion, or automated regression suite. LangSmith tracing is available but requires a configured API key.
 - The chatbot must remain a research aid and should not be used for clinical decisions.
 
 ## 8. Recommended Next Steps

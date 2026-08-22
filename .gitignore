@@ -15,3 +15,7 @@ data/mnd_burden.csv
 # Streamlit cache and operating-system files
 .streamlit/
 .DS_Store
+
+# Locally generated Word exports and temporary Office lock files
+*.docx
+~$*.docx

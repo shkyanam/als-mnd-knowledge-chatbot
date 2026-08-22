@@ -29,8 +29,9 @@ The chatbot answers only from the indexed research corpus and provides clickable
 | Vector database | Chroma | Local persistent storage and vector similarity retrieval. |
 | AI provider integration | OpenAI Python SDK with Nebius endpoint | Calls Nebius's OpenAI-compatible embedding and chat APIs. |
 | Project environment | uv | Dependency management and repeatable commands. |
+| Observability | LangSmith (optional) | Traces the LangGraph retrieve → generate workflow when the LangSmith environment variables are enabled. |
 
-The application does **not** currently use LCEL chains, LangSmith tracing/evaluations, or a dedicated BM25 search framework. Hybrid retrieval is implemented directly in `rag_app.py` with dense Chroma retrieval plus local keyword scoring.
+The application does **not** currently use LCEL chains or a dedicated BM25 search framework. Hybrid retrieval is implemented directly in `rag_app.py` with dense Chroma retrieval plus local keyword scoring. LangSmith tracing is opt-in; formal evaluation datasets have not yet been created.
 
 ## 5. Architecture
 
@@ -116,6 +117,8 @@ The generator receives only the five retrieved excerpts and is instructed to sum
 
 There is no measured faithfulness or relevance percentage yet. Create a small evaluation set of 20–30 representative questions, including factual, numeric, terminology, negative/unanswerable, and source-specific questions.
 
+When `LANGSMITH_TRACING=true` and a LangSmith API key are configured, each LangGraph request is traceable in the `als-mnd-knowledge-chatbot` LangSmith project. Use those traces to inspect retrieved chunks, prompt inputs, model output, and latency while evaluating the question set.
+
 For each question, record the expected source and answer, then measure:
 
 | Metric | Definition |
@@ -132,6 +135,6 @@ Compare recursive and semantic indexes using the same question set. The chosen s
 
 - The corpus is limited to 100 PMC articles and is manually refreshed.
 - Hybrid sparse scoring is local and lightweight; BM25 or a dedicated search service could be evaluated for larger corpora.
-- The application currently has no automated test set, LangSmith tracing, scheduled ingestion, reranker, or user feedback loop.
+- The application currently has no automated test set, scheduled ingestion, reranker, or user feedback loop. LangSmith tracing is available but requires a user-configured API key.
 - Sources may discuss ALS specifically; the answer prompt should distinguish ALS-specific findings from evidence about all MND subtypes.
 - Medical answers should remain literature summaries and direct users to qualified clinicians for personal medical advice.
