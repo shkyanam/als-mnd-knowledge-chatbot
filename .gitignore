@@ -1,0 +1,17 @@
+# Secrets and local environment
+.env
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Downloaded/generated local data and vector index
+data/pmc_xml/
+data/review_excluded/
+data/chroma_db/
+data/mnd_burden.csv
+
+# Streamlit cache and operating-system files
+.streamlit/
+.DS_Store

@@ -1,0 +1,20 @@
+[project]
+name = "bulbar-mnd-rag"
+version = "0.1.0"
+description = "Streamlit dashboard and Nebius-powered RAG chatbot for bulbar MND research"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "langchain-chroma",
+    "langchain-openai",
+    "langchain-text-splitters",
+    "langgraph",
+    "openpyxl",
+    "pandas",
+    "python-dotenv",
+    "requests",
+    "streamlit",
+]
+
+[tool.uv]
+package = false
