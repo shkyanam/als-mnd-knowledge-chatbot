@@ -6,7 +6,15 @@ This project is a research-oriented retrieval-augmented generation (RAG) applica
 
 The goal is to make a small, transparent research assistant that grounds answers in retrieved open-access literature and links readers back to the original PubMed Central (PMC) articles. It is not intended for diagnosis, treatment recommendations, or personal medical advice.
 
-## 2. What Was Built
+## 2. Problem, baseline, and measurable destination
+
+The audience is an MND learner or research user who needs a precise finding from a large set of papers. The present-day pain is passage discovery: dense-only retrieval can identify the relevant article but miss the exact evidence passage needed for a numeric answer.
+
+The baseline unit is **top-5 evidence task completion**. A task is complete when one of the five excerpts contains the expected source and all evidence terms needed for the answer. On the fixed active-period SNR question, dense-only retrieval placed the exact passage at rank 8 on the current 1,907-chunk semantic index, outside the top five: **0/1 completed (0%)**. The hybrid retriever retained the passage in the top five: **1/1 completed (100%)** on the seed smoke test. This is a diagnostic result (`n=1`), not a broad accuracy claim.
+
+The deployment target is to apply the same binary measure to 20–30 fixed questions and reach at least **90% top-5 evidence task completion**. See [EVALUATION_BASELINE.md](EVALUATION_BASELINE.md) for the rubric and command.
+
+## 3. What Was Built
 
 | Area | Implementation |
 | --- | --- |
@@ -23,7 +31,7 @@ The goal is to make a small, transparent research assistant that grounds answers
 | Observability | Optional LangSmith tracing for LangGraph requests, enabled through environment variables. |
 | Public-health dashboard data | A prepared IHME GBD Motor Neuron Disease export in `data/mnd_burden.csv`, used separately from the literature corpus. |
 
-## 3. Datasets Used
+## 4. Datasets Used
 
 ### 3.1 PMC literature dataset
 
@@ -37,7 +45,7 @@ The Streamlit dashboard separately uses an IHME Global Burden of Disease (GBD) e
 
 This dataset supports aggregate burden visualizations such as deaths and DALYs. It does not provide patient-level information, and it is not used by the literature chatbot unless a future data-query tool is added.
 
-## 4. Prompt and Agent Instructions
+## 5. Prompt and Agent Instructions
 
 ### 4.1 Retrieval workflow
 
@@ -68,7 +76,7 @@ After generation, the application appends deduplicated clickable PMC article lin
 
 LangSmith tracing is available for the LangGraph workflow. Add `LANGSMITH_TRACING=true`, `LANGSMITH_API_KEY`, and `LANGSMITH_PROJECT=als-mnd-knowledge-chatbot` to `.env` to capture request traces. Traces should be enabled only when it is appropriate to send user questions and retrieved excerpts to LangSmith.
 
-## 5. Iterations Tried
+## 6. Iterations Tried
 
 ### 5.1 Initial ingestion and corpus cleanup
 
@@ -101,7 +109,7 @@ The first retriever used only Chroma dense-vector similarity with `top-k = 5`. D
 
 ### 5.6 Hybrid retrieval
 
-An SNR question exposed this limitation. The correct paper, `PMC13042181`, was retrieved by dense search, but the exact passage containing the numerical answer ranked 79th and was not supplied to the chat model.
+An SNR question exposed this limitation. The correct paper, `PMC13042181`, was retrieved by dense search, but the exact passage containing the numerical answer ranked 8th and was not supplied to the chat model in the top five.
 
 Hybrid retrieval was then added directly in `rag_app.py`:
 
@@ -113,7 +121,7 @@ Hybrid retrieval was then added directly in `rag_app.py`:
 
 After this change, the chatbot correctly answered that active-period SNR rose from approximately **1 dB to 6 dB**, then declined to approximately **3 dB** by day 763.
 
-## 6. Learnings and Observations
+## 7. Learnings and Observations
 
 1. **Chunk count is not a quality metric by itself.** Semantic chunking reduced the index from 6,389 to 1,907 chunks, but evaluation should compare evidence retrieval and answer quality, not simply choose the smaller number.
 
@@ -131,15 +139,15 @@ After this change, the chatbot correctly answered that active-period SNR rose fr
 
 8. **Public-health data and literature evidence should remain separate.** The IHME burden dashboard answers aggregate burden questions; the PMC RAG corpus answers literature questions. Joining them requires an explicit data-query layer rather than treating papers as structured epidemiology data.
 
-## 7. Current Limitations
+## 8. Current Limitations
 
 - The corpus is manually refreshed and limited to 100 articles.
-- No formal faithfulness, retrieval-relevance, or answer-correctness benchmark has been run yet.
+- No multi-question faithfulness, retrieval-relevance, or answer-correctness benchmark has been run yet; the seeded SNR retrieval smoke test is documented separately.
 - Hybrid sparse retrieval is a lightweight in-project implementation, not a full BM25 or production search service.
-- There is no reranker, feedback capture, scheduled ingestion, or automated regression suite. LangSmith tracing is available but requires a configured API key.
+- There is no reranker, feedback capture, scheduled ingestion, or multi-question automated regression suite. LangSmith tracing is available but requires a configured API key.
 - The chatbot must remain a research aid and should not be used for clinical decisions.
 
-## 8. Recommended Next Steps
+## 9. Recommended Next Steps
 
 1. Create 20–30 evaluation questions with expected evidence sources and answers.
 2. Compare recursive and semantic indexes using retrieval relevance, answer correctness, faithfulness, and latency.

@@ -90,7 +90,7 @@ The system evaluates up to 100 dense candidates and 100 sparse candidates, then 
 
 ### Tested retrieval case
 
-For the question about the spectral signal-to-noise ratio (SNR) in an ALS speech BCI study, dense retrieval located the correct article (`PMC13042181.xml`) but ranked the exact numeric passage 79th. The hybrid retriever recognized `signal + noise` as `SNR`, included the exact passage, and the chatbot correctly returned: approximately **1 dB to 6 dB**, declining to approximately **3 dB** by day 763.
+For the fixed question about the spectral signal-to-noise ratio (SNR) in an ALS speech BCI study, dense retrieval located the correct article (`PMC13042181.xml`) but ranked the exact numeric passage 8th, outside the top five. The hybrid retriever recognized `signal + noise` as `SNR`, included the exact passage, and the chatbot correctly returned: approximately **1 dB to 6 dB**, declining to approximately **3 dB** by day 763. This is the seed task used in [EVALUATION_BASELINE.md](EVALUATION_BASELINE.md).
 
 ## 9. Answer Generation
 
@@ -115,7 +115,9 @@ The generator receives only the five retrieved excerpts and is instructed to sum
 
 ## 11. Evaluation Plan
 
-There is no measured faithfulness or relevance percentage yet. Create a small evaluation set of 20–30 representative questions, including factual, numeric, terminology, negative/unanswerable, and source-specific questions.
+The initial baseline uses **top-5 evidence task completion**: a question is complete when one of the five retrieved excerpts contains the expected source and all evidence terms needed for the answer. On the fixed active-period SNR question, dense-only retrieval ranked the exact evidence 8th on the current 1,907-chunk semantic index, so the baseline result was **0/1 (0%)**. Hybrid retrieval retained the evidence in the top five, giving a **1/1 (100%)** seed smoke-test result. The detailed rubric and reproducible command are in [EVALUATION_BASELINE.md](EVALUATION_BASELINE.md).
+
+This is a diagnostic seed (`n=1`), not a general accuracy claim. Create a fixed evaluation set of 20–30 representative questions, including factual, numeric, terminology, negative/unanswerable, and source-specific questions. The first deployment target is at least **90% top-5 evidence task completion** using the same binary unit.
 
 When `LANGSMITH_TRACING=true` and a LangSmith API key are configured, each LangGraph request is traceable in the `als-mnd-knowledge-chatbot` LangSmith project. Use those traces to inspect retrieved chunks, prompt inputs, model output, and latency while evaluating the question set.
 
@@ -135,6 +137,6 @@ Compare recursive and semantic indexes using the same question set. The chosen s
 
 - The corpus is limited to 100 PMC articles and is manually refreshed.
 - Hybrid sparse scoring is local and lightweight; BM25 or a dedicated search service could be evaluated for larger corpora.
-- The application currently has no automated test set, scheduled ingestion, reranker, or user feedback loop. LangSmith tracing is available but requires a user-configured API key.
+- The application currently has no multi-question automated test set, scheduled ingestion, reranker, or user feedback loop. The one-question retrieval smoke test is available through `evaluate_retrieval.py`. LangSmith tracing is available but requires a user-configured API key.
 - Sources may discuss ALS specifically; the answer prompt should distinguish ALS-specific findings from evidence about all MND subtypes.
 - Medical answers should remain literature summaries and direct users to qualified clinicians for personal medical advice.

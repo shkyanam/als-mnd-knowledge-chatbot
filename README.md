@@ -2,6 +2,10 @@
 
 This project downloads open-access PMC XML articles, creates a local Chroma vector index using Nebius embeddings, and provides a Streamlit dashboard and cited literature chatbot.
 
+## Architecture at a glance
+
+![Bulbar MND Research architecture](assets/bulbar-mnd-research-architecture.png)
+
 ## Setup
 
 1. Create the uv-managed project environment:
@@ -58,6 +62,34 @@ This project downloads open-access PMC XML articles, creates a local Chroma vect
 The answer is restricted to retrieved text, summarized without inline citations, and ends with clickable PubMed Central article links. It is for literature research only, not clinical decision-making.
 
 Retrieval is hybrid: Nebius dense-vector similarity is combined with a local keyword score. This helps precise terms, abbreviations, and numeric technical questions while retaining semantic matching.
+
+## Problem, baseline, and success measure
+
+The audience is an MND learner or research user who needs a precise finding from a large set of papers. The present-day pain is passage discovery: a dense-only search can find the right article but miss the exact passage needed to answer a numeric question.
+
+The initial measurable baseline is **top-5 evidence task completion**. A task is complete when one of the five excerpts contains the expected source and all of the evidence terms needed for the answer. On the fixed SNR question documented in [the evaluation baseline](EVALUATION_BASELINE.md), dense-only retrieval ranked the exact passage **8th**, outside the five excerpts: **0/1 tasks completed (0%)**. The current hybrid retriever retains that passage in the top five: **1/1 completed (100%)** on this seed smoke test.
+
+The seed result is not a general accuracy claim (`n=1`). The deployment target is to measure the same binary unit on 20–30 fixed questions and reach at least **90% top-5 evidence task completion**, while checking source-link accuracy separately. Re-run the reproducible smoke test with:
+
+```bash
+uv run python evaluate_retrieval.py
+```
+
+This project has not yet claimed a human time baseline; a timed user study can be added later without changing the retrieval metric.
+
+## One-command validation
+
+After creating `.env` from `.env.example` and adding `NEBIUS_API_KEY`, run the complete local validation pipeline:
+
+```bash
+./run_all.sh
+```
+
+This synchronizes dependencies, ensures the 100-article PMC corpus, builds the semantic index when needed, and runs the dense-versus-hybrid retrieval benchmark. Add `--rebuild` to force a fresh index or `--serve` to launch the Streamlit dashboard after validation:
+
+```bash
+./run_all.sh --rebuild --serve
+```
 
 ## Optional LangSmith tracing
 
